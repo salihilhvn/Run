@@ -225,8 +225,8 @@ Transform:
   m_GameObject: {fileID: 19269731}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710576, z: -0, w: 0.7071079}
-  m_LocalPosition: {x: -18, y: -0.61, z: 27}
-  m_LocalScale: {x: 64.808, y: 0.3436, z: 6.0958424}
+  m_LocalPosition: {x: 0, y: 0, z: 30}
+  m_LocalScale: {x: 64.808, y: 0.3436, z: 8.909805}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -527,7 +527,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 505778442}
-  - component: {fileID: 505778441}
   m_Layer: 0
   m_Name: CharacterRoot
   m_TagString: Untagged
@@ -535,23 +534,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &505778441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 505778440}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cab37492e2e39534d96c7a44944a1cd3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RunnerController
-  forwardSpeed: 5
-  startDelay: 2
-  laneDistance: 2
-  laneChangeSpeed: 12
-  animator: {fileID: 0}
 --- !u!4 &505778442
 Transform:
   m_ObjectHideFlags: 0
@@ -561,12 +543,12 @@ Transform:
   m_GameObject: {fileID: 505778440}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071057, z: -0, w: 0.7071079}
-  m_LocalPosition: {x: -12.8052635, y: -0.4382, z: -25.393707}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 278655984}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1499559612}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &832575517
 GameObject:
@@ -617,6 +599,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &843207058 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: f1f49b47633650d49b6436f46afe53ce, type: 3}
+  m_PrefabInstance: {fileID: 2000986462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1499559611
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1499559612}
+  - component: {fileID: 1499559613}
+  m_Layer: 0
+  m_Name: Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1499559612
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499559611}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 505778442}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1499559613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499559611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab37492e2e39534d96c7a44944a1cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RunnerController
+  forwardSpeed: 5
+  startDelay: 2
+  laneDistance: 2.5
+  laneChangeSpeed: 12
+  animator: {fileID: 843207058}
 --- !u!1001 &2000986462
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -627,15 +664,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f1f49b47633650d49b6436f46afe53ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -25.183937
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f1f49b47633650d49b6436f46afe53ce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.4382
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f1f49b47633650d49b6436f46afe53ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.1875706
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f1f49b47633650d49b6436f46afe53ce, type: 3}
       propertyPath: m_LocalRotation.w
@@ -690,4 +727,4 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 19269735}
-  - {fileID: 505778442}
+  - {fileID: 1499559612}

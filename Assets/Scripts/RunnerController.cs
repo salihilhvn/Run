@@ -9,19 +9,16 @@ public class RunnerController : MonoBehaviour
     [SerializeField] private float startDelay = 2f;
 
     [Header("Lane")]
-    [SerializeField] private float laneDistance = 2f;
-    [SerializeField] private float laneChangeSpeed = 10f;
+    [SerializeField] private float laneDistance = 2.5f;     // lane arası mesafe
+    [SerializeField] private float laneChangeSpeed = 12f;   // sağa sola geçiş hızı
 
     [Header("References")]
     [SerializeField] private Animator animator;
 
-    private bool isRunning = false;
-    private int currentLane = 0;
+    private bool isRunning;
+    private int currentLane = 0; // -1 = sol, 0 = orta, 1 = sağ
 
-    private float startX;
-    private float currentX;
     private float targetX;
-    private float currentZ;
     private float fixedY;
 
     private void Awake()
@@ -33,12 +30,8 @@ public class RunnerController : MonoBehaviour
     private void Start()
     {
         isRunning = false;
-
-        startX = transform.position.x;
-        currentX = startX;
-        targetX = startX;
-        currentZ = transform.position.z;
         fixedY = transform.position.y;
+        targetX = transform.position.x;
 
         if (animator != null)
             animator.SetBool("isRunning", false);
@@ -68,24 +61,29 @@ public class RunnerController : MonoBehaviour
     {
         if (Keyboard.current == null) return;
 
-        if (Keyboard.current.qKey.wasPressedThisFrame)
+        if (Keyboard.current.qKey.wasPressedThisFrame || Keyboard.current.aKey.wasPressedThisFrame)
         {
             currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
-            targetX = startX + (currentLane * laneDistance);
+            targetX = currentLane * laneDistance;
         }
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.dKey.wasPressedThisFrame)
         {
             currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-            targetX = startX + (currentLane * laneDistance);
+            targetX = currentLane * laneDistance;
         }
     }
 
     private void MoveRunner()
     {
-        currentZ += forwardSpeed * Time.deltaTime;
-        currentX = Mathf.MoveTowards(currentX, targetX, laneChangeSpeed * Time.deltaTime);
+        Vector3 currentPos = transform.position;
 
-        transform.position = new Vector3(currentX, fixedY, currentZ);
+        // sürekli ileri koş
+        currentPos += Vector3.forward * forwardSpeed * Time.deltaTime;
+
+        // lane geçişi
+        float newX = Mathf.MoveTowards(currentPos.x, targetX, laneChangeSpeed * Time.deltaTime);
+
+        transform.position = new Vector3(newX, fixedY, currentPos.z);
     }
 }

@@ -379,13 +379,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0.30070576, y: 0, z: 0, w: 0.953717}
   m_LocalPosition: {x: 0.08, y: 8.92, z: -6.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 35, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -442,11 +442,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4304c5a446138e48ba8e78c37249638, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 0}
-  height: 5
-  distance: 7.5
+  target: {fileID: 505778442}
+  height: 7
+  distance: 8
   followSpeed: 12
-  rotationSpeed: 12
+  rotationSpeed: 0.6
+  lookHeight: 3
+  followLaneX: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,7 +715,18 @@ MonoBehaviour:
   forwardSpeed: 5
   startDelay: 2
   laneDistance: 2.5
-  laneChangeSpeed: 12
+  laneChangeSpeed: 22
+  visualRoot: {fileID: 0}
+  laneTurnAngle: 18
+  laneLeanAngle: 10
+  visualRotateSpeed: 24
+  jumpHeight: 3.3
+  gravity: 20
+  fallGravityMultiplier: 2
+  apexGravityMultiplier: 3
+  apexThreshold: 2
+  rollDuration: 0.5
+  airRollGravityMultiplier: 4.5
   animator: {fileID: 1270230745}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

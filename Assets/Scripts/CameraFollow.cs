@@ -12,14 +12,27 @@ public class RunnerCameraFollow : MonoBehaviour
     [SerializeField] private float lookHeight = 1.0f;
     [SerializeField] private bool followLaneX = true;
 
+    private RunnerController runner;
+
+    private void Awake()
+    {
+        if (target != null)
+            runner = target.GetComponent<RunnerController>();
+    }
+
     private void LateUpdate()
     {
         if (target == null) return;
 
+        Vector3 followPosition = target.position;
+
+        if (runner != null && runner.IsHitReacting)
+            followPosition = runner.HitLockedPosition;
+
         Vector3 desiredPosition = new Vector3(
-            followLaneX ? target.position.x : transform.position.x,
-            target.position.y + height,
-            target.position.z - distance
+            followLaneX ? followPosition.x : transform.position.x,
+            followPosition.y + height,
+            followPosition.z - distance
         );
 
         transform.position = Vector3.Lerp(
@@ -29,9 +42,9 @@ public class RunnerCameraFollow : MonoBehaviour
         );
 
         Vector3 lookTarget = new Vector3(
-            followLaneX ? target.position.x : transform.position.x,
-            target.position.y + lookHeight,
-            target.position.z + 1.5f
+            followLaneX ? followPosition.x : transform.position.x,
+            followPosition.y + lookHeight,
+            followPosition.z + 1.5f
         );
 
         Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);

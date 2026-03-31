@@ -1,10 +1,11 @@
 using UnityEngine;
+using System.Collections;
 
 public class DamageZone : MonoBehaviour
 {
     [SerializeField] private int damageAmount = 1;
-    [SerializeField] private float hitCooldown = 0.5f; // tekrar vurma süresi
-    [SerializeField] private bool destroyAfterHit = false;
+    [SerializeField] private float hitCooldown = 0.5f;
+    [SerializeField] private bool disableZoneAfterHit = true;
 
     private bool canHit = true;
 
@@ -15,23 +16,39 @@ public class DamageZone : MonoBehaviour
         PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
         if (playerHealth == null) return;
 
+        RunnerController runner = other.GetComponentInParent<RunnerController>();
+
+        canHit = false;
+
         playerHealth.TakeDamage(damageAmount);
+
+        if (runner != null)
+            runner.TriggerHitReaction();
+
+        ObstacleDisappear obstacleDisappear = GetComponentInParent<ObstacleDisappear>();
+        if (obstacleDisappear != null)
+            obstacleDisappear.BeginDisappear();
+
         Debug.Log("HIT!");
 
-        if (destroyAfterHit)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
+        if (!disableZoneAfterHit)
             StartCoroutine(HitCooldownRoutine());
-        }
+        else
+            gameObject.SetActive(false);
     }
 
-    private System.Collections.IEnumerator HitCooldownRoutine()
+    private IEnumerator HitCooldownRoutine()
     {
-        canHit = false;
         yield return new WaitForSeconds(hitCooldown);
         canHit = true;
+    }
+
+    public void ResetZone()
+    {
+        StopAllCoroutines();
+        canHit = true;
+
+        if (disableZoneAfterHit)
+            gameObject.SetActive(true);
     }
 }

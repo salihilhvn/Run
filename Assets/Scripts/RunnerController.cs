@@ -36,27 +36,40 @@ public class RunnerController : MonoBehaviour
     [SerializeField] private float groundedSnapSpeed = 20f;
     [SerializeField] private float groundOffset = 0f;
 
+    [Header("Hit Reaction")]
+    [SerializeField] private string hitTriggerName = "Hit";
+    [SerializeField] private float hitInvulnerableTime = 0.6f;
+
     [Header("References")]
     [SerializeField] private Animator animator;
 
     private bool isRunning;
     private bool isRolling;
     private bool forceFastFall;
+    private bool isHitReacting;
+    private bool canTakeHit = true;
 
-    private int currentLane = 0; // -1 = sol, 0 = orta, 1 = sağ
+    private int currentLane = 0;
 
     private float targetX;
-    private float baseGroundY;
     private float currentGroundY;
-
     private float verticalVelocity;
     private float currentY;
     private float rollTimer;
     private bool isGrounded = true;
     private Quaternion visualBaseLocalRotation;
 
+    private Vector3 hitLockedPosition;
+    private float runnerZ;
+    private Vector3 initialPosition;
+
+    public bool IsHitReacting => isHitReacting;
+    public Vector3 HitLockedPosition => hitLockedPosition;
+
     private void Awake()
     {
+        initialPosition = transform.position;
+
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
@@ -69,45 +82,82 @@ public class RunnerController : MonoBehaviour
 
     private void Start()
     {
-        isRunning = false;
-        isRolling = false;
-        forceFastFall = false;
-
-        baseGroundY = transform.position.y;
-        currentGroundY = baseGroundY;
-        currentY = baseGroundY;
-        targetX = transform.position.x;
-
-        if (animator != null)
-        {
-            animator.SetBool("isRunning", false);
-            animator.SetBool("isGrounded", true);
-            animator.SetBool("isRolling", false);
-        }
-
-        if (visualRoot != null)
-            visualBaseLocalRotation = visualRoot.localRotation;
-
-        StartCoroutine(StartRunRoutine());
+        ResetRunner(initialPosition);
     }
 
     private void Update()
     {
         if (!isRunning) return;
 
+        if (isHitReacting)
+        {
+            currentY = Mathf.MoveTowards(currentY, currentGroundY, groundedSnapSpeed * Time.deltaTime);
+            transform.position = new Vector3(hitLockedPosition.x, currentY, hitLockedPosition.z);
+            return;
+        }
+
         HandleLaneInput();
         HandleJumpInput();
         HandleRollInput();
         UpdateRoll();
-        UpdateGroundReference();
+
+        if (isGrounded || verticalVelocity <= 0f)
+            UpdateGroundReference();
+
         MoveRunner();
         UpdateVisualLaneTurn();
+    }
+
+    public void ResetRunner()
+    {
+        ResetRunner(initialPosition);
+    }
+
+    public void ResetRunner(Vector3 startPosition)
+    {
+        StopAllCoroutines();
+
+        isRunning = false;
+        isRolling = false;
+        forceFastFall = false;
+        isHitReacting = false;
+        canTakeHit = true;
+
+        currentLane = 0;
+        targetX = startPosition.x;
+        currentGroundY = startPosition.y;
+        currentY = startPosition.y;
+        verticalVelocity = 0f;
+        rollTimer = 0f;
+        isGrounded = true;
+
+        runnerZ = startPosition.z;
+        hitLockedPosition = startPosition;
+
+        transform.position = startPosition;
+        transform.rotation = Quaternion.identity;
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+            animator.SetBool("isRunning", false);
+            animator.SetBool("isGrounded", true);
+            animator.SetBool("isRolling", false);
+            animator.ResetTrigger(hitTriggerName);
+        }
+
+        if (visualRoot != null)
+        {
+            visualBaseLocalRotation = visualRoot.localRotation;
+        }
+
+        StartCoroutine(StartRunRoutine());
     }
 
     private IEnumerator StartRunRoutine()
     {
         yield return new WaitForSeconds(startDelay);
-
         isRunning = true;
 
         if (animator != null)
@@ -135,8 +185,7 @@ public class RunnerController : MonoBehaviour
     {
         if (Keyboard.current == null) return;
 
-        if ((Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
-            && isGrounded)
+        if ((Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame) && isGrounded)
         {
             isGrounded = false;
             verticalVelocity = Mathf.Sqrt(jumpHeight * 2f * gravity);
@@ -155,9 +204,7 @@ public class RunnerController : MonoBehaviour
         if (Keyboard.current == null) return;
 
         if (Keyboard.current.sKey.wasPressedThisFrame && !isRolling)
-        {
             StartRoll();
-        }
     }
 
     private void StartRoll()
@@ -168,7 +215,6 @@ public class RunnerController : MonoBehaviour
         if (!isGrounded)
         {
             forceFastFall = true;
-
             if (verticalVelocity > 0f)
                 verticalVelocity = 0f;
         }
@@ -182,11 +228,8 @@ public class RunnerController : MonoBehaviour
         if (!isRolling) return;
 
         rollTimer -= Time.deltaTime;
-
         if (rollTimer <= 0f)
-        {
             StopRoll();
-        }
     }
 
     private void StopRoll()
@@ -202,27 +245,18 @@ public class RunnerController : MonoBehaviour
     {
         Vector3 rayOrigin = transform.position + Vector3.up * groundCheckHeight;
 
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundCheckDistance, groundMask))
-        {
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundCheckDistance, groundMask, QueryTriggerInteraction.Ignore))
             currentGroundY = hit.point.y + groundOffset;
-        }
-        else
-        {
-            currentGroundY = baseGroundY;
-        }
     }
 
     private void MoveRunner()
     {
-        Vector3 currentPos = transform.position;
-
-        currentPos += Vector3.forward * forwardSpeed * Time.deltaTime;
-
-        float newX = Mathf.MoveTowards(currentPos.x, targetX, laneChangeSpeed * Time.deltaTime);
+        runnerZ += forwardSpeed * Time.deltaTime;
+        float newX = Mathf.MoveTowards(transform.position.x, targetX, laneChangeSpeed * Time.deltaTime);
 
         ApplyJumpPhysics();
 
-        transform.position = new Vector3(newX, currentY, currentPos.z);
+        transform.position = new Vector3(newX, currentY, runnerZ);
     }
 
     private void ApplyJumpPhysics()
@@ -236,9 +270,7 @@ public class RunnerController : MonoBehaviour
         float currentGravity = gravity;
 
         if (forceFastFall)
-        {
             currentGravity *= airRollGravityMultiplier;
-        }
         else
         {
             if (verticalVelocity > 0f && verticalVelocity < apexThreshold)
@@ -251,7 +283,7 @@ public class RunnerController : MonoBehaviour
         verticalVelocity -= currentGravity * Time.deltaTime;
         currentY += verticalVelocity * Time.deltaTime;
 
-        if (currentY <= currentGroundY)
+        if (verticalVelocity <= 0f && currentY <= currentGroundY + 0.02f)
         {
             currentY = currentGroundY;
             verticalVelocity = 0f;
@@ -268,7 +300,6 @@ public class RunnerController : MonoBehaviour
         if (visualRoot == null) return;
 
         float laneDelta = targetX - transform.position.x;
-
         float targetYaw = 0f;
         float targetZLean = 0f;
 
@@ -289,10 +320,74 @@ public class RunnerController : MonoBehaviour
         );
     }
 
-    private void OnDrawGizmosSelected()
+    public void TriggerHitReaction()
     {
-        Gizmos.color = Color.yellow;
-        Vector3 rayOrigin = transform.position + Vector3.up * groundCheckHeight;
-        Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * groundCheckDistance);
+        if (!gameObject.activeInHierarchy) return;
+        if (isHitReacting) return;
+        if (!canTakeHit) return;
+
+        StartCoroutine(HitReactionRoutine());
+    }
+
+    private IEnumerator HitReactionRoutine()
+    {
+        isHitReacting = true;
+        canTakeHit = false;
+
+        hitLockedPosition = transform.position;
+        runnerZ = transform.position.z;
+
+        if (isRolling)
+            StopRoll();
+
+        forceFastFall = false;
+        verticalVelocity = 0f;
+        isGrounded = true;
+
+        UpdateGroundReference();
+        currentY = currentGroundY;
+
+        if (animator != null)
+        {
+            animator.SetBool("isGrounded", true);
+            animator.SetBool("isRolling", false);
+            animator.SetBool("isRunning", true);
+            animator.ResetTrigger(hitTriggerName);
+            animator.SetTrigger(hitTriggerName);
+        }
+
+        yield return null;
+    }
+
+    public void EndHitReaction()
+    {
+        if (!isHitReacting) return;
+
+        isHitReacting = false;
+
+        UpdateGroundReference();
+        currentY = currentGroundY;
+
+        forceFastFall = false;
+        verticalVelocity = 0f;
+        isGrounded = true;
+        runnerZ = transform.position.z;
+
+        transform.position = new Vector3(transform.position.x, currentY, runnerZ);
+
+        if (animator != null)
+        {
+            animator.SetBool("isRunning", true);
+            animator.SetBool("isGrounded", true);
+            animator.SetBool("isRolling", false);
+        }
+
+        StartCoroutine(HitInvulnerabilityRoutine());
+    }
+
+    private IEnumerator HitInvulnerabilityRoutine()
+    {
+        yield return new WaitForSeconds(hitInvulnerableTime);
+        canTakeHit = true;
     }
 }

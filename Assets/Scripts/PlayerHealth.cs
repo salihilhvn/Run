@@ -11,15 +11,16 @@ public class PlayerHealth : MonoBehaviour
     [Header("UI")]
     [SerializeField] private Image healthFillImage;
 
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+
     private void Start()
     {
-        currentHealth = maxHealth;
-        UpdateHealthUI();
+        ResetHealth();
     }
 
     private void Update()
     {
-        // TEST: H basınca damage al
         if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame)
         {
             TakeDamage(1);
@@ -39,6 +40,12 @@ public class PlayerHealth : MonoBehaviour
         {
             Debug.Log("Player Dead");
         }
+    }
+
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
+        UpdateHealthUI();
     }
 
     private void UpdateHealthUI()

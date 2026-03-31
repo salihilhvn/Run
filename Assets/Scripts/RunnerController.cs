@@ -39,6 +39,7 @@ public class RunnerController : MonoBehaviour
     [Header("Hit Reaction")]
     [SerializeField] private string hitTriggerName = "Hit";
     [SerializeField] private float hitInvulnerableTime = 0.6f;
+    [SerializeField] private float hitReactionDuration = 1.0f; // Yöntem 2 için bekleme süresi
 
     [Header("References")]
     [SerializeField] private Animator animator;
@@ -245,8 +246,18 @@ public class RunnerController : MonoBehaviour
     {
         Vector3 rayOrigin = transform.position + Vector3.up * groundCheckHeight;
 
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundCheckDistance, groundMask, QueryTriggerInteraction.Ignore))
+        // Eski groundCheckDistance (genelde 5) otobüs boyu kadar derinliği göremeyebilir.
+        // Bu yüzden güvenli, çok daha uzun bir 'güvenli mesafe' atıyoruz (50 birim).
+        float safeDistance = Mathf.Max(groundCheckDistance, 50f);
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, safeDistance, groundMask, QueryTriggerInteraction.Ignore))
+        {
             currentGroundY = hit.point.y + groundOffset;
+        }
+        else
+        {
+            currentGroundY = 0f; // Eğer altından yol biterse, varsayılan zemini en aşağısı (0) olarak kabul et.
+        }
     }
 
     private void MoveRunner()
@@ -263,8 +274,22 @@ public class RunnerController : MonoBehaviour
     {
         if (isGrounded)
         {
-            currentY = Mathf.MoveTowards(currentY, currentGroundY, groundedSnapSpeed * Time.deltaTime);
-            return;
+            // Karakter yere basıyor sanarken aslında altındaki zemin aniden yok olduysa
+            // (örneğin otobüsün üzerinden aşağı boşluğa adım atarsa):
+            if (currentY - currentGroundY > 0.5f)
+            {
+                isGrounded = false;
+                verticalVelocity = 0f; // Serbest düşüş başlasın
+                
+                if (animator != null)
+                    animator.SetBool("isGrounded", false);
+            }
+            else
+            {
+                // Normal zemin eğimlerinde yavaşça ayak uydur.
+                currentY = Mathf.MoveTowards(currentY, currentGroundY, groundedSnapSpeed * Time.deltaTime);
+                return;
+            }
         }
 
         float currentGravity = gravity;
@@ -356,7 +381,14 @@ public class RunnerController : MonoBehaviour
             animator.SetTrigger(hitTriggerName);
         }
 
-        yield return null;
+        // Yöntem 2: Inspector'da belirlenen sabit süreyi bekle
+        yield return new WaitForSeconds(hitReactionDuration);
+
+        // Belirlenen süre dolduğunda hala karakter kilitli durumdaysa serbest bırak ve koş
+        if (isHitReacting)
+        {
+            EndHitReaction();
+        }
     }
 
     public void EndHitReaction()

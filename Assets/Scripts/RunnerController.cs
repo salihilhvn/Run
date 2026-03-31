@@ -29,6 +29,13 @@ public class RunnerController : MonoBehaviour
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float airRollGravityMultiplier = 4.5f;
 
+    [Header("Ground Detect")]
+    [SerializeField] private float groundCheckHeight = 2f;
+    [SerializeField] private float groundCheckDistance = 5f;
+    [SerializeField] private LayerMask groundMask = ~0;
+    [SerializeField] private float groundedSnapSpeed = 20f;
+    [SerializeField] private float groundOffset = 0f;
+
     [Header("References")]
     [SerializeField] private Animator animator;
 
@@ -39,7 +46,8 @@ public class RunnerController : MonoBehaviour
     private int currentLane = 0; // -1 = sol, 0 = orta, 1 = sağ
 
     private float targetX;
-    private float fixedY;
+    private float baseGroundY;
+    private float currentGroundY;
 
     private float verticalVelocity;
     private float currentY;
@@ -65,8 +73,9 @@ public class RunnerController : MonoBehaviour
         isRolling = false;
         forceFastFall = false;
 
-        fixedY = transform.position.y;
-        currentY = fixedY;
+        baseGroundY = transform.position.y;
+        currentGroundY = baseGroundY;
+        currentY = baseGroundY;
         targetX = transform.position.x;
 
         if (animator != null)
@@ -75,8 +84,9 @@ public class RunnerController : MonoBehaviour
             animator.SetBool("isGrounded", true);
             animator.SetBool("isRolling", false);
         }
+
         if (visualRoot != null)
-    visualBaseLocalRotation = visualRoot.localRotation;
+            visualBaseLocalRotation = visualRoot.localRotation;
 
         StartCoroutine(StartRunRoutine());
     }
@@ -89,6 +99,7 @@ public class RunnerController : MonoBehaviour
         HandleJumpInput();
         HandleRollInput();
         UpdateRoll();
+        UpdateGroundReference();
         MoveRunner();
         UpdateVisualLaneTurn();
     }
@@ -154,12 +165,10 @@ public class RunnerController : MonoBehaviour
         isRolling = true;
         rollTimer = rollDuration;
 
-        // Havada roll yapılırsa hızlı düş
         if (!isGrounded)
         {
             forceFastFall = true;
 
-            // Karakter hâlâ yukarı çıkıyorsa anında aşağı yönlendir
             if (verticalVelocity > 0f)
                 verticalVelocity = 0f;
         }
@@ -189,17 +198,28 @@ public class RunnerController : MonoBehaviour
             animator.SetBool("isRolling", false);
     }
 
+    private void UpdateGroundReference()
+    {
+        Vector3 rayOrigin = transform.position + Vector3.up * groundCheckHeight;
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundCheckDistance, groundMask))
+        {
+            currentGroundY = hit.point.y + groundOffset;
+        }
+        else
+        {
+            currentGroundY = baseGroundY;
+        }
+    }
+
     private void MoveRunner()
     {
         Vector3 currentPos = transform.position;
 
-        // sürekli ileri koş
         currentPos += Vector3.forward * forwardSpeed * Time.deltaTime;
 
-        // lane geçişi
         float newX = Mathf.MoveTowards(currentPos.x, targetX, laneChangeSpeed * Time.deltaTime);
 
-        // jump physics
         ApplyJumpPhysics();
 
         transform.position = new Vector3(newX, currentY, currentPos.z);
@@ -209,24 +229,21 @@ public class RunnerController : MonoBehaviour
     {
         if (isGrounded)
         {
-            currentY = fixedY;
+            currentY = Mathf.MoveTowards(currentY, currentGroundY, groundedSnapSpeed * Time.deltaTime);
             return;
         }
 
         float currentGravity = gravity;
 
-        // Havada roll yaptıysa sert düşüş
         if (forceFastFall)
         {
             currentGravity *= airRollGravityMultiplier;
         }
         else
         {
-            // tepe noktasına yaklaşınca gravity azalır
             if (verticalVelocity > 0f && verticalVelocity < apexThreshold)
                 currentGravity *= apexGravityMultiplier;
 
-            // normal düşüş
             if (verticalVelocity < 0f)
                 currentGravity *= fallGravityMultiplier;
         }
@@ -234,9 +251,9 @@ public class RunnerController : MonoBehaviour
         verticalVelocity -= currentGravity * Time.deltaTime;
         currentY += verticalVelocity * Time.deltaTime;
 
-        if (currentY <= fixedY)
+        if (currentY <= currentGroundY)
         {
-            currentY = fixedY;
+            currentY = currentGroundY;
             verticalVelocity = 0f;
             isGrounded = true;
             forceFastFall = false;
@@ -258,7 +275,6 @@ public class RunnerController : MonoBehaviour
         if (Mathf.Abs(laneDelta) > 0.05f)
         {
             float dir = Mathf.Sign(laneDelta);
-
             targetYaw = dir * laneTurnAngle;
             targetZLean = -dir * laneLeanAngle;
         }
@@ -271,5 +287,12 @@ public class RunnerController : MonoBehaviour
             targetRotation,
             visualRotateSpeed * Time.deltaTime
         );
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Vector3 rayOrigin = transform.position + Vector3.up * groundCheckHeight;
+        Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * groundCheckDistance);
     }
 }

@@ -1,15 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]
-    [SerializeField] private int maxHealth = 3;
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] private int currentHealth;
 
     [Header("UI")]
     [SerializeField] private Image healthFillImage;
+    [SerializeField] private TMP_Text healthText;
 
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
@@ -23,7 +25,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame)
         {
-            TakeDamage(1);
+            TakeDamage(25);
         }
     }
 
@@ -52,5 +54,8 @@ public class PlayerHealth : MonoBehaviour
     {
         if (healthFillImage != null)
             healthFillImage.fillAmount = (float)currentHealth / maxHealth;
+            
+        if (healthText != null)
+            healthText.text = currentHealth.ToString();
     }
 }

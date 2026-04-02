@@ -67,9 +67,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10dbb9b245d0ef447a34fa5f3d3865bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageZone
-  damageAmount: 1
+  damageAmount: 25
   hitCooldown: 0.5
-  destroyAfterHit: 0
+  disableZoneAfterHit: 1
 --- !u!23 &37109200098015031
 MeshRenderer:
   m_ObjectHideFlags: 0

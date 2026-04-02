@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DamageZone : MonoBehaviour
 {
-    [SerializeField] private int damageAmount = 1;
+    [SerializeField] private int damageAmount = 25;
     [SerializeField] private float hitCooldown = 0.5f;
     [SerializeField] private bool disableZoneAfterHit = true;
 

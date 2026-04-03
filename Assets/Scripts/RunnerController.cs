@@ -8,6 +8,12 @@ public class RunnerController : MonoBehaviour
     [SerializeField] private float forwardSpeed = 5f;
     [SerializeField] private float startDelay = 2f;
 
+    [Header("Speed Increase")]
+    [SerializeField] private float speedIncreaseRate = 0.2f;
+    [SerializeField] private float maxSpeed = 20f;
+
+    private float currentSpeed;
+
     [Header("Lane")]
     [SerializeField] private float laneDistance = 2.5f;
     [SerializeField] private float laneChangeSpeed = 12f;
@@ -131,6 +137,7 @@ public class RunnerController : MonoBehaviour
         verticalVelocity = 0f;
         rollTimer = 0f;
         isGrounded = true;
+        currentSpeed = forwardSpeed;
 
         runnerZ = startPosition.z;
         hitLockedPosition = startPosition;
@@ -262,7 +269,12 @@ public class RunnerController : MonoBehaviour
 
     private void MoveRunner()
     {
-        runnerZ += forwardSpeed * Time.deltaTime;
+        if (currentSpeed < maxSpeed)
+        {
+            currentSpeed += speedIncreaseRate * Time.deltaTime;
+        }
+
+        runnerZ += currentSpeed * Time.deltaTime;
         float newX = Mathf.MoveTowards(transform.position.x, targetX, laneChangeSpeed * Time.deltaTime);
 
         ApplyJumpPhysics();

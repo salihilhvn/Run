@@ -35,4 +35,26 @@ public class MainMenuManager : MonoBehaviour
     {
         Debug.Log("ALTIN ALMA Butonuna Basıldı (Market)");
     }
+
+    // --- YENİ EKLENEN BUTONLAR ---
+
+    public void OnRankClicked()
+    {
+        Debug.Log("RANK Butonuna Basıldı -> Liderlik / Sıralama ekranı açılacak...");
+    }
+
+    public void OnStoreClicked()
+    {
+        Debug.Log("STORE Butonuna Basıldı -> Market paneli açılacak...");
+    }
+
+    public void OnCollectionClicked()
+    {
+        Debug.Log("COLLECTION Butonuna Basıldı -> Koleksiyon paneli açılacak...");
+    }
+
+    public void OnCharacterClicked()
+    {
+        Debug.Log("CHARACTER Butonuna Basıldı -> Karakter seçimi / Özelleştirme paneli açılacak...");
+    }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class ScoreManager : MonoBehaviour
     private int currentCoins = 0;
 
     public int CurrentCoins => currentCoins;
+    public Transform CoinUITransform => coinText != null ? coinText.transform : null;
 
     private void Awake()
     {
@@ -34,6 +36,13 @@ public class ScoreManager : MonoBehaviour
     {
         currentCoins += amount;
         UpdateCoinUI();
+        
+        // UI Punch Scale Animasyonu (Juicy efekt)
+        if (coinText != null)
+        {
+            coinText.transform.DOKill(true); // Önceki animasyonları temizle (üst üste binmeyi engeller)
+            coinText.transform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 10, 1);
+        }
     }
 
     private void UpdateCoinUI()

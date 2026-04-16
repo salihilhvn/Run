@@ -94,6 +94,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   coinValue: 1
   collectEffectPrefab: {fileID: 0}
+  rotationSpeed: {x: 0, y: 150, z: 0}
 --- !u!65 &1767532382240951736
 BoxCollider:
   m_ObjectHideFlags: 0

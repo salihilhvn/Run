@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class Coin : MonoBehaviour
 {
@@ -26,21 +27,54 @@ public class Coin : MonoBehaviour
         if (player != null)
         {
             isCollected = true;
-            
-            // ScoreManager üzerinden coini artırıyoruz
-            if (ScoreManager.Instance != null)
-            {
-                ScoreManager.Instance.AddCoin(coinValue);
-            }
 
-            // Toplanma efekti varsa yarat
+            // Toplanma efekti varsa yarat (Hemen yaratılsın)
             if (collectEffectPrefab != null)
             {
                 Instantiate(collectEffectPrefab, transform.position, Quaternion.identity);
             }
 
-            // Coini ekrandan yok et
-            gameObject.SetActive(false);
+            // Çifte toplamayı engellemek için collider'ı kapat
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            Camera mainCam = Camera.main;
+            // Arayüz noktası (ScoreManager ve CoinUITransform) bulunabiliyorsa uçuş animasyonunu başlat
+            if (mainCam != null && ScoreManager.Instance != null && ScoreManager.Instance.CoinUITransform != null)
+            {
+                // Karakter ilerlerken altının havada kalmaması için kameraya bağla
+                transform.SetParent(mainCam.transform, true);
+                
+                // UI objesinin ekrandaki konumunu dünya konumuna (kameranın 5 birim önü) çevir
+                Vector3 screenPos = ScoreManager.Instance.CoinUITransform.position;
+                screenPos.z = 5f; 
+                Vector3 targetWorld = mainCam.ScreenToWorldPoint(screenPos);
+                
+                // Kameraya bağlı olduğu için local konumu hesapla
+                Vector3 targetLocal = mainCam.transform.InverseTransformPoint(targetWorld);
+
+                Sequence seq = DOTween.Sequence();
+                
+                // UI'a doğru süzül (Ease.InQuad akıcı bir süzülme sağlar) ve aynı anda küçül
+                seq.Append(transform.DOLocalMove(targetLocal, 0.5f).SetEase(Ease.InQuad));
+                seq.Join(transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InQuad));
+
+                // Animasyon bitince puanı ekle ve objeyi gizle
+                seq.OnComplete(() =>
+                {
+                    ScoreManager.Instance.AddCoin(coinValue);
+                    gameObject.SetActive(false);
+                });
+            }
+            else
+            {
+                // Kamera veya UI yoksa eski usül hemen puan ekle ve yok ol
+                if (ScoreManager.Instance != null)
+                {
+                    ScoreManager.Instance.AddCoin(coinValue);
+                }
+                gameObject.SetActive(false);
+            }
         }
     }
 }

@@ -11,7 +11,15 @@ public class MainMenuManager : MonoBehaviour
     public void OnPlayClicked()
     {
         Debug.Log("PLAY Butonuna Basıldı -> Oyun Sahnesine Geçiliyor...");
-        // Örn: SceneManager.LoadScene("GameScene");
+        
+        if (SceneController.Instance != null)
+        {
+            SceneController.Instance.LoadScene("GameScene");
+        }
+        else
+        {
+            SceneManager.LoadScene("GameScene");
+        }
     }
 
     public void OnLevelsClicked()

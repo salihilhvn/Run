@@ -41,7 +41,19 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0)
         {
             Debug.Log("Player Dead");
+            if (GameUIManager.Instance != null)
+            {
+                GameUIManager.Instance.ShowFailPanel();
+            }
         }
+    }
+
+    public void Revive(int amount)
+    {
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHealthUI();
+        Debug.Log($"Player Revived with {amount} extra health!");
     }
 
     public void ResetHealth()

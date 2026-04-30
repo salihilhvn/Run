@@ -6,12 +6,24 @@ public class GameUIManager : MonoBehaviour
 {
     public static GameUIManager Instance { get; private set; }
 
+    [Header("Pause Panel Ayarları")]
+    [Tooltip("Arka planı hafif karartan ana Pause Panel objesi")]
+    [SerializeField] private GameObject pausePanel;
+    
+    [Tooltip("Animasyonla yaylanarak çıkacak olan ortadaki asıl Pause Pop-up penceresi")]
+    [SerializeField] private RectTransform pausePopupContent;
+
     [Header("Fail Panel Ayarları")]
     [Tooltip("Arka planı hafif karartan ana Fail Panel objesi")]
     [SerializeField] private GameObject failPanel;
     
     [Tooltip("Animasyonla yaylanarak çıkacak olan ortadaki asıl Pop-up penceresi")]
     [SerializeField] private RectTransform failPopupContent;
+
+    [Tooltip("Sadece ilk ölümde çıkacak olan Reklam (Continue) Butonu")]
+    [SerializeField] private GameObject continueAdButton;
+
+    private bool hasUsedRevive = false; // Oyuncu dirilme hakkını kullandı mı?
 
     private void Awake()
     {
@@ -20,10 +32,57 @@ public class GameUIManager : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // Oyun başlarken paneli kapalı tut
+        // Oyun başlarken panelleri kapalı tut
         if (failPanel != null)
             failPanel.SetActive(false);
+            
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
     }
+
+    // --- PAUSE MENU (DURDURMA) MANTIKLARI ---
+
+    // Sol üstteki Pause butonuna (veya ESC tuşuna) basıldığında çalışır
+    public void OnPauseClicked()
+    {
+        if (pausePanel == null) return;
+
+        // Oyunu durdur
+        Time.timeScale = 0f;
+        
+        // Paneli aktif et
+        pausePanel.SetActive(true);
+
+        if (pausePopupContent != null)
+        {
+            // Pop-up animasyonu için önce boyutunu sıfırla
+            pausePopupContent.localScale = Vector3.zero;
+            
+            // Animasyon oynat (oyun durmuş olsa bile)
+            pausePopupContent.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutBack).SetUpdate(true);
+        }
+    }
+
+    // Pause menüsündeki "Resume" (Devam Et) butonuna basıldığında çalışır
+    public void OnResumeClicked()
+    {
+        if (pausePopupContent != null)
+        {
+            // Önce paneli animasyonla küçülterek kapat, tamamen kapanınca oyunu devam ettir
+            pausePopupContent.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack).SetUpdate(true).OnComplete(() =>
+            {
+                pausePanel.SetActive(false);
+                Time.timeScale = 1f; // Zamanı normal akışına çevir
+            });
+        }
+        else
+        {
+            pausePanel.SetActive(false);
+            Time.timeScale = 1f;
+        }
+    }
+
+    // --- FAIL MENU (ÖLÜM) MANTIKLARI ---
 
     public void ShowFailPanel()
     {
@@ -31,6 +90,12 @@ public class GameUIManager : MonoBehaviour
 
         // Oyunu durdur (Karakter, engeller vs. dursun)
         Time.timeScale = 0f;
+
+        // Eğer oyuncu daha önce reklam izleyip canlandıysa, reklam butonunu gizle!
+        if (continueAdButton != null)
+        {
+            continueAdButton.SetActive(!hasUsedRevive);
+        }
         
         // Paneli aktif et
         failPanel.SetActive(true);
@@ -75,6 +140,9 @@ public class GameUIManager : MonoBehaviour
     {
         // Zamanı geri düzelt ki oyun aksın
         Time.timeScale = 1f;
+
+        // Oyuncu dirilme hakkını kullandı, bir sonraki ölümde buton çıkmayacak!
+        hasUsedRevive = true;
 
         if (failPopupContent != null)
         {

@@ -45,7 +45,8 @@ public class RunnerController : MonoBehaviour
     [Header("Hit Reaction")]
     [SerializeField] private string hitTriggerName = "Hit";
     [SerializeField] private float hitInvulnerableTime = 0.6f;
-    [SerializeField] private float hitReactionDuration = 1.0f; // Yöntem 2 için bekleme süresi
+    [Tooltip("Animasyon eventi çalıştıktan (kalktıktan) sonra koşmaya başlamak için ekstra bekleme süresi")]
+    [SerializeField] private float postHitResumeDelay = 0.3f; 
 
     [Header("References")]
     [SerializeField] private Animator animator;
@@ -178,15 +179,42 @@ public class RunnerController : MonoBehaviour
 
         if (Keyboard.current.qKey.wasPressedThisFrame || Keyboard.current.aKey.wasPressedThisFrame)
         {
-            currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
-            targetX = currentLane * laneDistance;
+            if (currentLane > -1 && !IsLaneBlocked(Vector3.left))
+            {
+                currentLane--;
+                targetX = currentLane * laneDistance;
+            }
         }
 
         if (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.dKey.wasPressedThisFrame)
         {
-            currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-            targetX = currentLane * laneDistance;
+            if (currentLane < 1 && !IsLaneBlocked(Vector3.right))
+            {
+                currentLane++;
+                targetX = currentLane * laneDistance;
+            }
         }
+    }
+
+    private bool IsLaneBlocked(Vector3 direction)
+    {
+        // Karakterin bel hizasından yana doğru görünmez bir küre (SphereCast) fırlatıyoruz
+        Vector3 rayOrigin = transform.position + Vector3.up * 1f; 
+        float radius = 0.5f; // Karakterin genişliği
+        
+        // Yana doğru şerit genişliği kadar tarama yap
+        RaycastHit[] hits = Physics.SphereCastAll(rayOrigin, radius, direction, laneDistance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+        
+        foreach (var hit in hits)
+        {
+            // Eğer yana atılan ışın bir engele veya hasar bölgesine (otobüse) çarptıysa:
+            if (hit.collider.GetComponentInParent<ObstacleDisappear>() != null || hit.collider.GetComponentInParent<DamageZone>() != null)
+            {
+                Debug.Log("Şerit değiştirme engellendi! Yanda otobüs var.");
+                return true; // Şerit dolu, geçişi iptal et!
+            }
+        }
+        return false;
     }
 
     private void HandleJumpInput()
@@ -366,6 +394,7 @@ public class RunnerController : MonoBehaviour
         StartCoroutine(HitReactionRoutine());
     }
 
+
     private IEnumerator HitReactionRoutine()
     {
         isHitReacting = true;
@@ -374,8 +403,7 @@ public class RunnerController : MonoBehaviour
         hitLockedPosition = transform.position;
         runnerZ = transform.position.z;
 
-        if (isRolling)
-            StopRoll();
+        if (isRolling) StopRoll();
 
         forceFastFall = false;
         verticalVelocity = 0f;
@@ -393,17 +421,50 @@ public class RunnerController : MonoBehaviour
             animator.SetTrigger(hitTriggerName);
         }
 
-        // Yöntem 2: Inspector'da belirlenen sabit süreyi bekle
-        yield return new WaitForSeconds(hitReactionDuration);
+        // Animasyon motorunun tetiklenmesi için minik bir bekleme
+        yield return new WaitForSeconds(0.1f);
 
-        // Belirlenen süre dolduğunda hala karakter kilitli durumdaysa serbest bırak ve koş
-        if (isHitReacting)
+        if (animator != null)
         {
-            EndHitReaction();
+            float safetyTimer = 0f;
+            bool isInHitState = false;
+
+            // Maksimum 5 saniyelik sigorta süresi. Event'leri ve sabit süreleri tamamen çöpe atıyoruz!
+            // Animasyon %95 oranında tamamlanana kadar (normalizedTime >= 0.95f) karakteri kilitli tutacağız.
+            while (safetyTimer < 5f)
+            {
+                safetyTimer += Time.deltaTime;
+
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                
+                // Karakter düşme animasyonuna girdi mi veya hala geçişte mi?
+                if (animator.IsInTransition(0) || stateInfo.normalizedTime < 0.95f)
+                {
+                    isInHitState = true;
+                    yield return null; // Kilitli kalmaya devam et
+                }
+                else if (isInHitState)
+                {
+                    // Animasyon %95'i geçti ve geçiş bitti! Artık kilidi açabiliriz.
+                    break;
+                }
+                else
+                {
+                    yield return null;
+                }
+            }
         }
+
+        EndHitReactionDirectly();
     }
 
     public void EndHitReaction()
+    {
+        // HitAnimationRelay (Event) üzerinden gelen eski çağrıları yoksayıyoruz.
+        // Çünkü artık süreci tamamen yukarıdaki Routine yönetiyor.
+    }
+
+    private void EndHitReactionDirectly()
     {
         if (!isHitReacting) return;
 

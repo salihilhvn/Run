@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
-    // [Header("Pop-up Panelleri")]
-    // İleride buraya Pop-up ekranlarının referanslarını koyacağız
+    [Header("Panels")]
+    public GameObject storePanel;
     // public GameObject levelsPanel;
     // public GameObject settingsPanel;
 
@@ -53,7 +53,20 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnStoreClicked()
     {
-        Debug.Log("STORE Butonuna Basıldı -> Market paneli açılacak...");
+        Debug.Log("STORE Butonuna Basıldı -> Market paneli açılıyor...");
+        if (storePanel != null)
+        {
+            storePanel.SetActive(true);
+        }
+    }
+
+    public void CloseStorePanel()
+    {
+        Debug.Log("STORE paneli kapatılıyor...");
+        if (storePanel != null)
+        {
+            storePanel.SetActive(false);
+        }
     }
 
     public void OnCollectionClicked()

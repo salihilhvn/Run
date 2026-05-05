@@ -2001,71 +2001,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 606e36f9dbadea043b68d167caf3b819, type: 3}
   m_PrefabInstance: {fileID: 242354859}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &262466641
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.09155251
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.29631597
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 22.088615
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 976480112792484830, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2655126908605266822, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_Name
-      value: FrontDamageZone
-      objectReference: {fileID: 0}
-    - target: {fileID: 5674367982361052807, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_Size.z
-      value: 1.562151
-      objectReference: {fileID: 0}
-    - target: {fileID: 5674367982361052807, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
-      propertyPath: m_Center.z
-      value: -5.9620047
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 0acbf286d57aab846ba00df217cbcfac, type: 3}
 --- !u!1 &264010934
 GameObject:
   m_ObjectHideFlags: 0
@@ -9594,7 +9529,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1214222887
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11780,7 +11715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab37492e2e39534d96c7a44944a1cd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunnerController
-  forwardSpeed: 5
+  forwardSpeed: 10
   startDelay: 2
   speedIncreaseRate: 0.2
   maxSpeed: 20
@@ -11806,7 +11741,7 @@ MonoBehaviour:
   groundOffset: 0
   hitTriggerName: Hit
   hitInvulnerableTime: 0.6
-  postHitResumeDelay: 2.4
+  postHitResumeDelay: 3
   animator: {fileID: 1270230745}
 --- !u!114 &1499559614
 MonoBehaviour:
@@ -12288,12 +12223,12 @@ GameObject:
   - component: {fileID: 1543916378}
   - component: {fileID: 1543916377}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: PausePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1543916376
 RectTransform:
   m_ObjectHideFlags: 0
@@ -18592,4 +18527,3 @@ SceneRoots:
   - {fileID: 1123714526}
   - {fileID: 1124469489}
   - {fileID: 2051601957}
-  - {fileID: 262466641}

@@ -5,6 +5,7 @@ public class MainMenuManager : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject storePanel;
+    public GameObject characterPanel; // Karakter ekranı için panel referansı
     // public GameObject levelsPanel;
     // public GameObject settingsPanel;
 
@@ -76,6 +77,19 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnCharacterClicked()
     {
-        Debug.Log("CHARACTER Butonuna Basıldı -> Karakter seçimi / Özelleştirme paneli açılacak...");
+        Debug.Log("CHARACTER Butonuna Basıldı -> Karakter geliştirme paneli açılıyor...");
+        if (characterPanel != null)
+        {
+            characterPanel.SetActive(true);
+        }
+    }
+
+    public void CloseCharacterPanel()
+    {
+        Debug.Log("CHARACTER paneli kapatılıyor...");
+        if (characterPanel != null)
+        {
+            characterPanel.SetActive(false);
+        }
     }
 }

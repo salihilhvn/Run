@@ -14,18 +14,22 @@ public class StatUIElements
 {
     public StatType statType;
     
+    [Header("Top Bar UI")]
+    public Image statProgressBar; // Gelişmişlik seviyesi barı
+    public int maxLevel = 50; // Maksimum seviye sınırı
+    
     [Header("Coin Upgrade UI")]
     public GameObject coinUpgradeActive;
-    public GameObject coinUpgradeInactive; // Bakiye yetersizse gösterilecek buton objesi
+    public GameObject coinUpgradeInactive;
     
     [Header("Diamond Upgrade UI")]
     public GameObject diamondUpgradeActive;
-    public GameObject diamondUpgradeInactive; // Bakiye yetersizse gösterilecek buton objesi
+    public GameObject diamondUpgradeInactive;
     
     [Header("Ad Upgrade UI")]
     public GameObject adButtonActive;
-    public GameObject adButtonGet; // 3 kere izlenince çıkacak GET butonu
-    public Image adProgressFill; // Arka plan dolum barı (Image componenti, Fill Amount kullanılacak)
+    public GameObject adButtonGet;
+    public Image adProgressFill;
 }
 
 public class CharacterUpgradeManager : MonoBehaviour
@@ -33,12 +37,6 @@ public class CharacterUpgradeManager : MonoBehaviour
     [Header("UI Settings")]
     public StatUIElements[] statUIList;
 
-    [Header("Global Currency (Geçici Test İçin)")]
-    public int currentCoins = 1000; // Sonradan gerçek coin sistemine bağlanacak
-    public int currentDiamonds = 50; // Sonradan gerçek elmas sistemine bağlanacak
-
-    // Bu verileri daha sonra PlayerPrefs ile kaydedeceğiz
-    // Şimdilik sadece bellekte tutuyoruz
     private int[] adWatchedCounts = new int[4]; 
     private const int requiredAds = 3;
     
@@ -49,42 +47,97 @@ public class CharacterUpgradeManager : MonoBehaviour
 
     private void Start()
     {
+        LoadStats();
         UpdateAllUI();
+        
+        // Currency değiştiğinde UI'ı güncellemek için event'e abone oluyoruz
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.OnCurrencyChanged += UpdateAllUI;
+        }
     }
 
-    // Parametreleri Button'ların OnClick olayından (Inspector üzerinden) int olarak vereceğiz.
-    // 0: Speed, 1: Resistance, 2: Explorer, 3: Lucky
-    
+    private void OnDestroy()
+    {
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.OnCurrencyChanged -= UpdateAllUI;
+        }
+    }
+
+    private void LoadStats()
+    {
+        for (int i = 0; i < statLevels.Length; i++)
+        {
+            statLevels[i] = PlayerPrefs.GetInt("StatLevel_" + i, 0);
+            adWatchedCounts[i] = PlayerPrefs.GetInt("StatAdCount_" + i, 0);
+        }
+    }
+
+    private void SaveStat(int index)
+    {
+        PlayerPrefs.SetInt("StatLevel_" + index, statLevels[index]);
+        PlayerPrefs.SetInt("StatAdCount_" + index, adWatchedCounts[index]);
+        PlayerPrefs.Save();
+    }
+
     public void BuyWithCoin(int statIndex)
     {
-        if (currentCoins >= coinCost)
+        int maxLvl = statUIList[statIndex].maxLevel;
+        if (statLevels[statIndex] >= maxLvl)
         {
-            currentCoins -= coinCost;
+            Debug.Log("Maksimum seviyeye ulaşıldı!");
+            return;
+        }
+
+        if (CurrencyManager.Instance != null && CurrencyManager.Instance.SpendCoins(coinCost))
+        {
             statLevels[statIndex]++;
+            SaveStat(statIndex);
             Debug.Log(((StatType)statIndex).ToString() + " Coin ile Upgrade Edildi! Yeni Seviye: " + statLevels[statIndex]);
             UpdateAllUI();
+        }
+        else
+        {
+            Debug.Log("Yeterli Coin Yok!");
         }
     }
 
     public void BuyWithDiamond(int statIndex)
     {
-        if (currentDiamonds >= diamondCost)
+        int maxLvl = statUIList[statIndex].maxLevel;
+        if (statLevels[statIndex] >= maxLvl)
         {
-            currentDiamonds -= diamondCost;
+            Debug.Log("Maksimum seviyeye ulaşıldı!");
+            return;
+        }
+
+        if (CurrencyManager.Instance != null && CurrencyManager.Instance.SpendDiamonds(diamondCost))
+        {
             statLevels[statIndex]++;
+            SaveStat(statIndex);
             Debug.Log(((StatType)statIndex).ToString() + " Diamond ile Upgrade Edildi! Yeni Seviye: " + statLevels[statIndex]);
             UpdateAllUI();
+        }
+        else
+        {
+            Debug.Log("Yeterli Diamond Yok!");
         }
     }
 
     public void WatchAd(int statIndex)
     {
-        // Burada gerçek bir reklam gösterme (AdMob, UnityAds vb.) kodu çağrılacak.
-        // Reklam başarıyla izlendiğinde alttaki kod çalışmalı:
-        
+        int maxLvl = statUIList[statIndex].maxLevel;
+        if (statLevels[statIndex] >= maxLvl)
+        {
+            Debug.Log("Maksimum seviyeye ulaşıldı!");
+            return;
+        }
+
         if (adWatchedCounts[statIndex] < requiredAds)
         {
             adWatchedCounts[statIndex]++;
+            SaveStat(statIndex);
             Debug.Log(((StatType)statIndex).ToString() + " için Reklam İzlendi: " + adWatchedCounts[statIndex] + "/" + requiredAds);
             UpdateAllUI();
         }
@@ -92,10 +145,14 @@ public class CharacterUpgradeManager : MonoBehaviour
 
     public void GetAdUpgrade(int statIndex)
     {
+        int maxLvl = statUIList[statIndex].maxLevel;
+        if (statLevels[statIndex] >= maxLvl) return;
+
         if (adWatchedCounts[statIndex] >= requiredAds)
         {
-            adWatchedCounts[statIndex] = 0; // Reklam sayacını sıfırla
+            adWatchedCounts[statIndex] = 0;
             statLevels[statIndex]++;
+            SaveStat(statIndex);
             Debug.Log(((StatType)statIndex).ToString() + " Reklam ile Upgrade Edildi! Yeni Seviye: " + statLevels[statIndex]);
             UpdateAllUI();
         }
@@ -103,48 +160,63 @@ public class CharacterUpgradeManager : MonoBehaviour
 
     public void ResetUpgrades()
     {
-        Debug.Log("Tüm Upgradeler Sıfırlandı!");
+        Debug.Log("Tüm Upgradeler ve Paralar Sıfırlandı!");
         for (int i = 0; i < statLevels.Length; i++)
         {
             statLevels[i] = 0;
             adWatchedCounts[i] = 0;
+            PlayerPrefs.DeleteKey("StatLevel_" + i);
+            PlayerPrefs.DeleteKey("StatAdCount_" + i);
         }
+        
+        PlayerPrefs.Save();
+
+        // Paraları da sıfırlayalım ki tam test olsun
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.ResetCurrencies();
+        }
+        
         UpdateAllUI();
     }
 
     public void InfoButtonClicked(int statIndex)
     {
-        Debug.Log(((StatType)statIndex).ToString() + " özelliği için info butonuna basıldı. (Daha sonra eklenecek)");
+        Debug.Log(((StatType)statIndex).ToString() + " özelliği için info butonuna basıldı.");
     }
 
-    // Arayüzü güncelleyen fonksiyon
     private void UpdateAllUI()
     {
+        int currentCoins = CurrencyManager.Instance != null ? CurrencyManager.Instance.TotalCoins : 0;
+        int currentDiamonds = CurrencyManager.Instance != null ? CurrencyManager.Instance.TotalDiamonds : 0;
+
         for (int i = 0; i < statUIList.Length; i++)
         {
             StatUIElements ui = statUIList[i];
             int index = (int)ui.statType;
 
-            // Coin Butonu Durumu
-            bool canAffordCoin = currentCoins >= coinCost;
+            bool isMaxLevel = statLevels[index] >= ui.maxLevel;
+
+            bool canAffordCoin = currentCoins >= coinCost && !isMaxLevel;
             if (ui.coinUpgradeActive != null) ui.coinUpgradeActive.SetActive(canAffordCoin);
             if (ui.coinUpgradeInactive != null) ui.coinUpgradeInactive.SetActive(!canAffordCoin);
 
-            // Diamond Butonu Durumu
-            bool canAffordDiamond = currentDiamonds >= diamondCost;
+            bool canAffordDiamond = currentDiamonds >= diamondCost && !isMaxLevel;
             if (ui.diamondUpgradeActive != null) ui.diamondUpgradeActive.SetActive(canAffordDiamond);
             if (ui.diamondUpgradeInactive != null) ui.diamondUpgradeInactive.SetActive(!canAffordDiamond);
 
-            // AD ve GET Butonu Durumu
             bool isAdComplete = adWatchedCounts[index] >= requiredAds;
-            if (ui.adButtonActive != null) ui.adButtonActive.SetActive(!isAdComplete);
-            if (ui.adButtonGet != null) ui.adButtonGet.SetActive(isAdComplete);
+            if (ui.adButtonActive != null) ui.adButtonActive.SetActive(!isAdComplete && !isMaxLevel);
+            if (ui.adButtonGet != null) ui.adButtonGet.SetActive(isAdComplete && !isMaxLevel);
 
-            // Ad Progress Bar (1/3, 2/3, 3/3)
             if (ui.adProgressFill != null)
             {
-                // FillAmount 0 ile 1 arasında değer alır
                 ui.adProgressFill.fillAmount = (float)adWatchedCounts[index] / requiredAds;
+            }
+
+            if (ui.statProgressBar != null)
+            {
+                ui.statProgressBar.fillAmount = (float)statLevels[index] / ui.maxLevel;
             }
         }
     }

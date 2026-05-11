@@ -6,8 +6,37 @@ public class MainMenuManager : MonoBehaviour
     [Header("Panels")]
     public GameObject storePanel;
     public GameObject characterPanel; // Karakter ekranı için panel referansı
-    // public GameObject levelsPanel;
-    // public GameObject settingsPanel;
+    
+    [Header("Top Bar UI")]
+    public TMPro.TMP_Text globalCoinText;
+    public TMPro.TMP_Text globalDiamondText;
+
+    private void Start()
+    {
+        UpdateCurrencyUI();
+
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.OnCurrencyChanged += UpdateCurrencyUI;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.OnCurrencyChanged -= UpdateCurrencyUI;
+        }
+    }
+
+    private void UpdateCurrencyUI()
+    {
+        if (CurrencyManager.Instance != null)
+        {
+            if (globalCoinText != null) globalCoinText.text = CurrencyManager.Instance.TotalCoins.ToString();
+            if (globalDiamondText != null) globalDiamondText.text = CurrencyManager.Instance.TotalDiamonds.ToString();
+        }
+    }
 
     public void OnPlayClicked()
     {

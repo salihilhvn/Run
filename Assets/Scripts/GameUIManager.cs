@@ -113,6 +113,8 @@ public class GameUIManager : MonoBehaviour
     // Try Again Butonuna bağlanacak
     public void OnTryAgainClicked()
     {
+        SaveCollectedCoins();
+
         // Zamanı geri normal akışına çevir
         Time.timeScale = 1f;
         
@@ -126,6 +128,8 @@ public class GameUIManager : MonoBehaviour
     // Back to Menu Butonuna bağlanacak
     public void OnBackToMenuClicked()
     {
+        SaveCollectedCoins();
+
         // Zamanı geri normal akışına çevir
         Time.timeScale = 1f;
         
@@ -133,6 +137,20 @@ public class GameUIManager : MonoBehaviour
             SceneController.Instance.LoadScene("MainMenu");
         else
             SceneManager.LoadScene("MainMenu");
+    }
+
+    private void SaveCollectedCoins()
+    {
+        // Eğer o el hiç para toplamadıysa veya sistemler yoksa bir şey yapma
+        if (ScoreManager.Instance != null && CurrencyManager.Instance != null)
+        {
+            int collected = ScoreManager.Instance.CurrentCoins;
+            if (collected > 0)
+            {
+                CurrencyManager.Instance.AddCoins(collected);
+                Debug.Log(collected + " Altın kasaya eklendi! Yeni Toplam: " + CurrencyManager.Instance.TotalCoins);
+            }
+        }
     }
 
     // Continue (Watch AD) Butonuna bağlanacak

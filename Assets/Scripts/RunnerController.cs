@@ -90,7 +90,19 @@ public class RunnerController : MonoBehaviour
 
     private void Start()
     {
+        ApplySpeedUpgrade();
         ResetRunner(initialPosition);
+    }
+
+    private void ApplySpeedUpgrade()
+    {
+        int speedLevel = PlayerPrefs.GetInt("StatLevel_0", 0); // 0 = Speed Stat Index
+        float multiplier = Mathf.Pow(1.015f, speedLevel);
+        
+        forwardSpeed *= multiplier;
+        maxSpeed *= multiplier;
+        
+        Debug.Log("Speed Multiplier Applied: " + multiplier + " | New Forward Speed: " + forwardSpeed);
     }
 
     private void Update()

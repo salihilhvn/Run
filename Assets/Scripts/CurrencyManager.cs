@@ -29,6 +29,17 @@ public class CurrencyManager : MonoBehaviour
         private set { PlayerPrefs.SetInt("TotalCoins", value); }
     }
 
+    private void Update()
+    {
+        // Klavyeden 'M' tuşuna basıldığında para ateşle! (Hile)
+        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.mKey.wasPressedThisFrame)
+        {
+            AddCoins(50000);
+            AddDiamonds(1000);
+            Debug.Log("HİLE AKTİF: 50.000 Altın ve 1.000 Elmas eklendi!");
+        }
+    }
+
     public int TotalDiamonds
     {
         get { return PlayerPrefs.GetInt("TotalDiamonds", 0); }

@@ -31,12 +31,27 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage;
+        int resLevel = PlayerPrefs.GetInt("StatLevel_1", 0); // 1 = Resistance Stat Index
+        float resistanceVal = 10f * Mathf.Pow(1.015f, resLevel);
+
+        int finalDamage = damage;
+        
+        // Sadece varsayılan 25 damage için veya genel bir kural olarak hasar azaltma mantığı
+        if (damage == 25)
+        {
+            if (resistanceVal >= 10f && resistanceVal < 12f) finalDamage = 25;
+            else if (resistanceVal >= 12f && resistanceVal < 15f) finalDamage = 23;
+            else if (resistanceVal >= 15f && resistanceVal < 17f) finalDamage = 22;
+            else if (resistanceVal >= 17f && resistanceVal <= 20f) finalDamage = 21;
+            else if (resistanceVal > 20f) finalDamage = 20;
+        }
+
+        currentHealth -= finalDamage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
         UpdateHealthUI();
 
-        Debug.Log("Current Health: " + currentHealth);
+        Debug.Log($"Incoming Damage: {damage} | Final Damage Applied: {finalDamage} | Current Health: {currentHealth}");
 
         if (currentHealth <= 0)
         {

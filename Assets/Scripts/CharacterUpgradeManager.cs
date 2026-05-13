@@ -15,6 +15,7 @@ public class StatUIElements
     public StatType statType;
     
     [Header("Top Bar UI")]
+    public TMPro.TMP_Text statValueText; // Yandaki değer texti (1.00, 10 vs)
     public Image statProgressBar; // Gelişmişlik seviyesi barı
     public int maxLevel = 50; // Maksimum seviye sınırı
     
@@ -217,6 +218,25 @@ public class CharacterUpgradeManager : MonoBehaviour
             if (ui.statProgressBar != null)
             {
                 ui.statProgressBar.fillAmount = (float)statLevels[index] / ui.maxLevel;
+            }
+
+            if (ui.statValueText != null)
+            {
+                if (ui.statType == StatType.Speed)
+                {
+                    float val = 1.0f * Mathf.Pow(1.015f, statLevels[index]);
+                    ui.statValueText.text = val.ToString("F2"); // Örn: 1.02
+                }
+                else if (ui.statType == StatType.Resistance)
+                {
+                    float val = 10f * Mathf.Pow(1.015f, statLevels[index]);
+                    ui.statValueText.text = val.ToString("F2"); // Örn: 10.15
+                }
+                else
+                {
+                    // Explorer ve Lucky şimdilik level sayısını veya 0 gösterebilir
+                    ui.statValueText.text = statLevels[index].ToString();
+                }
             }
         }
     }

@@ -5,6 +5,7 @@
 Bu proje MIT Lisansı altında lisanslanmıştır. Daha fazla bilgi için LICENSE dosyasını okuyun.
 
 # 🏃‍♂️ Project RUN (Vertical Slice)
+
 <img width="1440" height="2560" alt="Loading_" src="https://github.com/user-attachments/assets/bf3b1743-b7e3-467f-9041-871002466228" />
 
 Project RUN is a mobile hybrid-casual runner developed in **Unity 6000.3.5f2**. Unlike traditional endless runners that rely on an "all-or-nothing" high-score model, this project introduces a **Level-Based Progression System** combined with RPG-style **Meta-Progression** to reduce player frustration and increase long-term retention.
@@ -44,27 +45,34 @@ A balanced **Taps & Sinks** ecosystem designed around a modular character upgrad
 
 ### 1. Main Menu & Level Progression
 *Visual onboarding and progression tracking.*
+
 ![Main Menu]
+
 <img width="1440" height="2560" alt="Artboard 1" src="https://github.com/user-attachments/assets/0e8df537-c35e-44f3-89c1-5ef880e4f8c5" />
 
 
 ### 2. Character Upgrades & Stats Panel
 *The core meta-game loop showing individual stat upgrades via Gold/Diamonds/Ads.*
+
 ![Character Upgrades]
-<img width="1440" height="2560" alt="Çalışma yüzeyi 2" src="https://github.com/user-attachments/assets/00d6bb0e-6cf5-49f5-840b-181f040cb32c" />
-<img width="1440" height="2560" alt="CHARACTER_FEATURES" src="https://github.com/user-attachments/assets/2f25a8ec-c322-4f2b-85f6-f80e5ccb3108" />
+
+<img width="1440" height="2560" alt="CHARACTER_FEATURES" src="https://github.com/user-attachments/assets/dd7fa639-f3dd-49af-9883-2c9f1c164a3c" />
+
 
 ### 3. Gameplay & Pause States
 *Real-time runner gameplay featuring low-poly assets and the integrated health state.*
 ![Gameplay]
+
 <img width="547" height="966" alt="Ekran görüntüsü 2026-05-11 231129" src="https://github.com/user-attachments/assets/4656e4a5-1552-4fd4-adc4-34b896a6823f" />
 
 ![Pause Menu]
+
 <img width="543" height="964" alt="Ekran görüntüsü 2026-05-11 231257" src="https://github.com/user-attachments/assets/d35a1ce4-526e-4e4b-a937-40f2c469ab7b" />
 
 ---
 
-![Uploading Çalışma yüzeyi 2.png…]()
+<img width="1440" height="2560" alt="Çalışma yüzeyi 2" src="https://github.com/user-attachments/assets/a5ccf9d5-b02a-4cb1-b047-03514be3dbe9" />
+
 
 ## 🧭 Unimplemented Vision (Future Roadmap)
 Due to a solo-developer scoping crunch (burnout phase), the following high-fidelity mechanics currently exist in the design layer but are not fully hooked into the core loop:
